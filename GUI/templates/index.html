@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="static/painting.js"></script>
+    <script src="static/sending_commands.js"></script>
+    <script>
+    inx = 1;
+    last_code = 0;
+    function key_press(event) {
+      var x = event.which || event.keyCode;
+      send_code(x)
+    }
+
+    function main(){
+
+    }
+    obst5 = new Obstacle(100,50);
+    obst4 = new Obstacle(150,60);
+    obst3 = new Obstacle(70,80);
+    obst2 = new Obstacle(10,10);
+    obst1 = new Obstacle(200,200);
+    obstacles = [obst1,obst2,obst3,obst4,obst5];
+    function draw_obstacles(){
+      var ctx =  get_ctx();
+      var obst_to_delate = [];
+      for (i = 0; i != obstacles.length; i++) {
+        obstacles[i].draw(ctx);
+        if(obstacles[i].time_of_life > 150)
+          obst_to_delate.push(i);
+      }
+      for(var inx in obst_to_delate) {
+          obstacles.splice(inx,1);
+      }
+
+    }
+
+    $(document).ready(function(){
+        var timerId = setTimeout(function tick() {
+          draw_back();
+          draw_obstacles();
+          main();
+          timerId = setTimeout(tick, 40);
+        }, 40);
+      });
+
+    </script>
+  </head>
+  <body onkeydown="key_press(event)" onkeyup="send_stop()">
+
+    <canvas id="myCanvas" width="400" height="300" style="border:1px solid #000000;"></canvas>
+
+    <table>
+     <tr>
+       <th></th>
+       <th> <button onmousedown="send_code(38)" onmouseup="send_stop()" >UP</button> </th>
+       <th></th>
+     </tr>
+     <tr>
+       <td><button onmousedown="send_code(37)" onmouseup="send_stop()" >LF</button></td>
+       <td><button onmousedown="send_code(40)" onmouseup="send_stop()" >DW</button></td>
+       <td><button onmousedown="send_code(39)" onmouseup="send_stop()" >RH</button></td>
+     </tr>
+   </table>
+   <p id="demo"></p>
+   <p id="data"></p>
+  </body>
+</html>
