@@ -2,7 +2,8 @@ __author__ = 'stiv'
 
 black = ( 0, 0, 0)
 white = ( 255, 255, 255)
-blue = (255,255,0)
+blue = (49,49,79)
+yellow = (255,255,0)
 green = ( 0, 255, 0)
 red = ( 255, 0, 0)
 
@@ -71,6 +72,7 @@ class Button:
 
 class LogWindow:
     def __init__(self,screen,pos):
+        self.num = 0
         self.pos=pos
         self.screen=screen
         self.lines = []
@@ -84,7 +86,8 @@ class LogWindow:
 
     def add_line(self,line):
         if len(self.lines) and line == self.lines[-1]: return
-        self.lines.append(line)
+        self.lines.append("%s %s"%(self.num,  line))
+        self.num += 1
         self.lines = self.lines[-5:]
 
 
