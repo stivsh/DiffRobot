@@ -308,6 +308,9 @@ class Odometry{
 ModMesure distanse_r(Ultrasonic(8, 9));
 ModMesure distanse_c(Ultrasonic(10, 11));
 ModMesure distanse_l(Ultrasonic(12, 13));
+float c_dist;
+float l_dist;
+float r_dist;
 
 #define LPWD_PIN 6
 #define RPWD_PIN 5
@@ -473,8 +476,32 @@ class TernTo: public Action{
     leftWeelControl.reset();
     rightWeelControl.reset();    
   }
-
 };
+
+class MaintainDistance: public Action{
+  private:
+  PIDControl diffWeelControl;
+  PIDControl speedConstrol;
+  public:
+  MaintainDistance():diffWeelControl(0.1,0.01,0.6,-12,12),speedConstrol(2,0.01,0.5,-30,30){}
+
+  virtual void perform(){
+
+    float sidediff = (l_dist < 20)? l_dist:20 - (r_dist < 20)? r_dist:20;
+    float diffsig = diffWeelControl.getSignal(sidediff);
+    float speedsig =  speedConstrol.getSignal(c_dist - 10);
+    if(c_dist < 13 && c_dist > 8) speedsig = 0;
+    leftWeelControl.setR(-speedsig + diffsig);
+    rightWeelControl.setR(-speedsig - diffsig);
+    control();    
+  }
+  virtual ~MaintainDistance(){
+    leftWeelControl.reset();
+    rightWeelControl.reset();    
+  }
+};
+
+
 bool check_command(char buff[]){
     if(strstr(buff,"F")){
       Serial.println("log:Go forward;");
@@ -504,6 +531,12 @@ bool check_command(char buff[]){
       Serial.println("log:Stop;");
       delete curAction;
       curAction = new EmptyAction();
+      return true;
+    }
+    if(strstr(buff,"MD")){
+      Serial.println("log:MDIST;");
+      delete curAction;
+      curAction = new MaintainDistance();
       return true;
     }
     if(strstr(buff,"GOTO:")){
@@ -625,12 +658,13 @@ void controlTimer(){ //1 per 200 mils
 
 
 
-unsigned long lastTransmission = millis();
+
 void loop()
 {  
-
- if(millis() - lastTransmission > 250){
-    lastTransmission = millis();
+  c_dist = distanse_c.read();
+  l_dist = distanse_l.read();
+  r_dist = distanse_r.read();
+ 
     Serial.print("pos:");
     Serial.print(int(odometry.getX()));
     Serial.print(":");
@@ -639,8 +673,20 @@ void loop()
     Serial.print("angl:");
     Serial.print(odometry.getA());
     Serial.print('e');
+
+    Serial.print("LDist:");
+    Serial.print(l_dist);
+    Serial.print("e");
+    
+    Serial.print("CDist:");
+    Serial.print(c_dist);
+    Serial.print("e");
+
+    Serial.print("RDist:");
+    Serial.print(r_dist);
+    Serial.print("e");
     Serial.println();
-  }
+    
   
   //read action
   while(Serial.available() > 0) {
