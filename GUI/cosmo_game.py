@@ -4,7 +4,8 @@ from bluetooth_robot_interface import RobotInterface
 from Graphics.graphical_objs import *
 
 def transform_distanses(x):
-    if x<4 : x=0
+    if x < 4 : x=0
+    if x > 25 : x=0
     x = (x+8)*2
     if x>180 : x=None
     return x

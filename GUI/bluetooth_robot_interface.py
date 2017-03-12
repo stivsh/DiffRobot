@@ -59,6 +59,7 @@ class RobotInterface:
                 sock.close()
             except Exception as ex:
                 if self._log: self._log("> " + str(ex))
+                time.sleep(2)
 
     def set_log_func(self,log):
         self._log = log
